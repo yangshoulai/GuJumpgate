@@ -294,15 +294,15 @@
         <div class="data-inline setting-pair">
           <div class="setting-group setting-group-primary">
             <label class="toggle-switch" for="input-plus-mode-enabled" title="开启后使用 Plus Checkout 支付授权流程">
-              <input type="checkbox" id="input-plus-mode-enabled" checked disabled />
+              <input type="checkbox" id="input-plus-mode-enabled" checked />
               <span class="toggle-switch-track" aria-hidden="true">
                 <span class="toggle-switch-thumb"></span>
               </span>
             </label>
           </div>
           <div class="setting-group setting-group-secondary plus-checkout-mode-switch-group" id="plus-checkout-mode-switch-group">
-            <span class="setting-caption plus-checkout-mode-switch-caption">已固定开启</span>
-            <div class="plus-checkout-mode-switch" role="radiogroup" aria-label="Plus Checkout 模式切换">
+            <span class="setting-caption plus-checkout-mode-switch-caption" id="plus-checkout-mode-switch-caption"></span>
+            <div class="plus-checkout-mode-switch" id="plus-checkout-mode-switch" role="radiogroup" aria-label="Plus Checkout 模式切换">
               <label class="plus-checkout-mode-option" for="input-plus-checkout-mode-us">
                 <input type="radio" name="plus-checkout-mode" id="input-plus-checkout-mode-us" value="us_pp" checked />
                 <span>美区PP Plus Checkout</span>

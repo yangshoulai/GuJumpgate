@@ -184,6 +184,8 @@ const rowCustomPassword = document.getElementById('row-custom-password');
 const rowPlusMode = document.getElementById('row-plus-mode');
 const inputPlusModeEnabled = document.getElementById('input-plus-mode-enabled');
 const plusCheckoutModeSwitchGroup = document.getElementById('plus-checkout-mode-switch-group');
+const plusCheckoutModeSwitchCaption = document.getElementById('plus-checkout-mode-switch-caption');
+const plusCheckoutModeSwitch = document.getElementById('plus-checkout-mode-switch');
 const inputPlusCheckoutModeUs = document.getElementById('input-plus-checkout-mode-us');
 const inputPlusCheckoutModeJp = document.getElementById('input-plus-checkout-mode-jp');
 const rowPlusPaymentMethod = document.getElementById('row-plus-payment-method');
@@ -680,7 +682,7 @@ const PLUS_CHECKOUT_PROFILE_SETTING_KEYS = Object.freeze([
   'hostedCheckoutVerificationPollAttempts',
   'hostedCheckoutVerificationPollIntervalSeconds',
 ]);
-const FIXED_PLUS_MODE_ENABLED = true;
+const DEFAULT_PLUS_MODE_ENABLED = true;
 const GUIDE_REPOSITORY_URL = 'https://github.com/FoundZiGu/GuJumpgate';
 const SIGNUP_METHOD_EMAIL = 'email';
 const SIGNUP_METHOD_PHONE = 'phone';
@@ -5194,9 +5196,6 @@ function collectSettingsPayload() {
   const cloudflareTempEmailReceiveMailboxNormalizer = typeof normalizeCloudflareTempEmailReceiveMailboxValue === 'function'
     ? normalizeCloudflareTempEmailReceiveMailboxValue
     : ((value) => String(value || '').trim());
-  const fixedPlusModeEnabled = typeof FIXED_PLUS_MODE_ENABLED === 'boolean'
-    ? FIXED_PLUS_MODE_ENABLED
-    : true;
   const selectedPlusCheckoutMode = getActivePlusCheckoutModeFromState(latestState);
   const currentPlusCheckoutProfiles = getLocalPlusCheckoutProfilesDraft(latestState);
   const nextPlusCheckoutProfiles = {
@@ -5255,7 +5254,7 @@ function collectSettingsPayload() {
     ipProxyRegion: currentIpProxyServiceProfile.region,
     codex2apiUrl: inputCodex2ApiUrl.value.trim(),
     codex2apiAdminKey: inputCodex2ApiAdminKey.value.trim(),
-    plusModeEnabled: fixedPlusModeEnabled,
+    plusModeEnabled: rawPlusModeEnabled,
     plusPaymentMethod,
     plusCheckoutMode: selectedPlusCheckoutMode,
     plusCheckoutProfiles: nextPlusCheckoutProfiles,
@@ -11035,6 +11034,12 @@ function updatePlusModeUI() {
   [inputPlusCheckoutModeUs, inputPlusCheckoutModeJp].filter(Boolean).forEach((input) => {
     input.disabled = !checkoutModeSwitchVisible;
   });
+  if (plusCheckoutModeSwitch) {
+    plusCheckoutModeSwitch.style.display = checkoutModeSwitchVisible ? '' : 'none';
+  }
+  if (plusCheckoutModeSwitchCaption) {
+    plusCheckoutModeSwitchCaption.textContent = enabled ? '' : '已关闭';
+  }
   if (typeof selectPlusPaymentMethod !== 'undefined' && selectPlusPaymentMethod) {
     selectPlusPaymentMethod.value = selectedMethod;
     if (selectPlusPaymentMethod.style) {
@@ -12097,7 +12102,9 @@ function applySettingsState(state) {
   }
   syncPasswordField(state || {});
   if (typeof inputPlusModeEnabled !== 'undefined' && inputPlusModeEnabled) {
-    inputPlusModeEnabled.checked = FIXED_PLUS_MODE_ENABLED;
+    inputPlusModeEnabled.checked = Object.prototype.hasOwnProperty.call(state || {}, 'plusModeEnabled')
+      ? Boolean(state.plusModeEnabled)
+      : DEFAULT_PLUS_MODE_ENABLED;
   }
   if (typeof selectPlusPaymentMethod !== 'undefined' && selectPlusPaymentMethod) {
     selectPlusPaymentMethod.value = normalizePlusPaymentMethod(state?.plusPaymentMethod);
@@ -18361,6 +18368,12 @@ function isPlusCheckoutCloudConversionEnabled() {
 }
 
 function validatePlusCheckoutCloudConversionConfig(options = {}) {
+  const plusModeEnabled = typeof inputPlusModeEnabled !== 'undefined' && inputPlusModeEnabled
+    ? Boolean(inputPlusModeEnabled.checked)
+    : Boolean(latestState?.plusModeEnabled);
+  if (!plusModeEnabled) {
+    return { valid: true, message: '' };
+  }
   const method = normalizePlusPaymentMethod(
     typeof selectPlusPaymentMethod !== 'undefined' && selectPlusPaymentMethod
       ? selectPlusPaymentMethod.value
